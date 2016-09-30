@@ -39,9 +39,10 @@ class baryonic_state(object):
 baryonic_state.id = 0		
 	
 class ship(object):
-	""" Holds ship data"""
+	""" Holds ship data """
 	def __init__(self):		
 		self.thrust = .1
+		
 		self.state = baryonic_state()		
 		
 	def update_image(self,image):
@@ -51,15 +52,85 @@ class ship(object):
 	def prop(self):
 		self.state.prop()
 		
-	def boost(self):
+	def maneuver(self,commands):
+		""" commands = (up,down,left,right,ctrl) """
+		#  (1,-1)  (1,0)  (1,1)
+		#  (0,-1)  (0,0)  (0,1)
+		# (-1,-1) (-1,0) (-1,1)
+		direction = (commands[0] - commands[1], commands[3] - commands[2])
+		if (0,0) == direction:
+			return
+			
+		if commands[4]:
+			# Ion thrusters
+			if (1,-1) == direction:
+				self.rcs_pro()
+			elif (1,0) == direction:
+				self.rcs_pro()
+			elif (1,1) == direction:
+				self.rcs_pro()
+			elif (0,-1) == direction:
+				self.rcs_left()
+			elif (0,1) == direction:
+				self.rcs_right()
+			elif (-1,-1) == direction:
+				self.rcs_retro()
+			elif (-1,0) == direction:
+				self.rcs_retro()
+			elif (-1,1) == direction:
+				self.rcs_retro()
+			
+		else:
+			# Main thrusters
+			if (1,-1) == direction:
+				self.boost_pro()
+			elif (1,0) == direction:
+				self.boost_pro()
+			elif (1,1) == direction:
+				self.boost_pro()
+			elif (0,-1) == direction:
+				self.boost_left()
+			elif (0,1) == direction:
+				self.boost_right()
+			elif (-1,-1) == direction:
+				self.boost_retro()
+			elif (-1,0) == direction:
+				self.boost_retro()
+			elif (-1,1) == direction:
+				self.boost_retro()
+				
+		
+	def boost_pro(self):
+		self.boost_left()
+		self.boost_right()
+		
+	def boost_left(self):
 		self.state.acc(self.thrust * math.cos(self.state.ori),
 					 - self.thrust * math.sin(self.state.ori))
-		
-	def rcs_left(self):
 		self.state.rot_acc(.001)
 		
-	def rcs_right(self):
+	def boost_right(self):
+		self.state.acc(self.thrust * math.cos(self.state.ori),
+					 - self.thrust * math.sin(self.state.ori))
 		self.state.rot_acc(-.001)
+		
+	def boost_retro(self):
+		self.state.acc(- self.thrust/2 * math.cos(self.state.ori),
+					     self.thrust/2 * math.sin(self.state.ori))
+		
+	def rcs_pro(self):
+		self.state.acc(self.thrust/10 * math.cos(self.state.ori),
+					 - self.thrust/10 * math.sin(self.state.ori))
+		
+	def rcs_left(self):
+		self.state.rot_acc(.0001)
+		
+	def rcs_right(self):
+		self.state.rot_acc(-.0001)
+		
+	def rcs_retro(self):
+		self.state.acc(- self.thrust/10 * math.cos(self.state.ori),
+					     self.thrust/10 * math.sin(self.state.ori))
 		
 	def fire_missile(self):
 		new_missile = missile()
@@ -68,7 +139,7 @@ class ship(object):
 			
 		
 class missile(object):
-	"""Holds missile data"""
+	"""Holds missile data """
 	def __init__(self):
 		self.thrust = .5
 		self.state = baryonic_state()		

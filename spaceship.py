@@ -54,10 +54,12 @@ def main():
 				elif event.button == 3: # right click shrinks radius 
 					print 'balls'
 
-		
-		if pressed[pygame.K_UP]: ship.boost()
-		if pressed[pygame.K_LEFT]: ship.rcs_left()
-		if pressed[pygame.K_RIGHT]: ship.rcs_right()
+		ship.maneuver((pressed[pygame.K_UP],
+					   pressed[pygame.K_DOWN],
+					   pressed[pygame.K_LEFT],
+					   pressed[pygame.K_RIGHT],
+					   pressed[pygame.K_RCTRL]))
+
 		if pressed[pygame.K_SPACE]: 
 			new_missile = ship.fire_missile()
 			new_missile.update_image(image_dict['missile'])
