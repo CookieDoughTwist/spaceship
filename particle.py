@@ -3,12 +3,11 @@ import math
 import operations
 import copy
 
-class baryon(object):
+class baryonic_state(object):
 	""" Holds Baryonic Data """
 	def __init__(self,parent_id=-1):
-		self.id = baryon.id
-		self.parent_id = parent_id
-		baryon.id += 1
+		self.id = baryonic_state.id
+		baryonic_state.id += 1
 		self.x = 0
 		self.y = 0
 		self.vel_x = 0
@@ -16,12 +15,7 @@ class baryon(object):
 		self.ori = 0
 		self.vel_ori = 0
 		self.mass = 1		
-		self.thrust = .1
-		
-	def update_image(self,image_load,image_frac):
-		rec = image_load.get_rect().size
-		self.image = pygame.transform.scale(image_load,(rec[0]/image_frac,rec[1]/image_frac))
-		
+	
 	def move(self,x,y):
 		self.x = x
 		self.y = y
@@ -34,38 +28,65 @@ class baryon(object):
 		self.y += self.vel_y
 		self.ori += self.vel_ori
 		
-	def rot_left(self):
-		self.ori += .1
+	def acc(self,ddx,ddy):
+		self.vel_x += ddx
+		self.vel_y += ddy
 		
-	def rot_right(self):
-		self.ori -= .1
-	
-	def get_image(self):
-		return operations.rot_center(self.image,self.ori / (2*math.pi) * 360 - 90)		
+	def rot_acc(self,ddori):
+		self.vel_ori += ddori
+		
 
-baryon.id = 0		
+baryonic_state.id = 0		
 	
-def display(screen,baryon):
-	image = baryon.get_image()
-	center = image.get_rect().center
-	screen.blit(image,(baryon.x-center[0],baryon.y-center[1]))		
-	
-	
-def boost(baryon):
-	baryon.vel_x += (baryon.thrust / baryon.mass) * math.cos(baryon.ori)
-	baryon.vel_y -= (baryon.thrust / baryon.mass) * math.sin(baryon.ori)
-	
-def torque_boost_left(baryon):
-	baryon.vel_ori += .001
-	
-def torque_boost_right(baryon):
-	baryon.vel_ori -= .001
-	
-def fire(baryon,image):
-	missile = copy.copy(baryon)
-	missile.update_image(image,50)
-	missile.id = 1
-	missile.thrust = .5
-	return missile
-	
+class ship(object):
+	""" Holds ship data"""
+	def __init__(self):		
+		self.thrust = .1
+		self.state = baryonic_state()		
+		
+	def update_image(self,image):
+		rec = image.get_rect().size
+		self.image = pygame.transform.scale(image,(rec[0]/10,rec[1]/10))		
+		
+	def prop(self):
+		self.state.prop()
+		
+	def boost(self):
+		self.state.acc(self.thrust * math.cos(self.state.ori),
+					 - self.thrust * math.sin(self.state.ori))
+		
+	def rcs_left(self):
+		self.state.rot_acc(.001)
+		
+	def rcs_right(self):
+		self.state.rot_acc(-.001)
+		
+	def fire_missile(self):
+		new_missile = missile()
+		new_missile.set_state(copy.copy(self.state))
+		return new_missile
+			
+		
+class missile(object):
+	"""Holds missile data"""
+	def __init__(self):
+		self.thrust = .5
+		self.state = baryonic_state()		
+
+	def update_image(self,image):
+		rec = image.get_rect().size
+		self.image = pygame.transform.scale(image,(rec[0]/100,rec[1]/100))		
+		
+	def prop(self):
+		self.state.prop()
+		self.boost()
+		
+	def set_state(self,state):
+		self.state = state
+		
+	def boost(self):
+		self.state.vel_x += self.thrust * math.cos(self.state.ori)
+		self.state.vel_y -= self.thrust * math.sin(self.state.ori)
+
+
 	

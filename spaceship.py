@@ -1,25 +1,42 @@
 import pygame
 import math
 import particle
+import operations
 
 
+def load_images():
+	image_dict = dict()
+	image_dict['rocket'] = pygame.image.load('rocket_small_cute_lineart_neo.png')
+	image_dict['missile'] = pygame.image.load('missile_square.png')
+	return image_dict
+
+def display_particle(screen,particle):
+	state = particle.state
+	image = operations.rot_center(particle.image,state.ori / (2*math.pi) * 360 - 90)		
+	center = image.get_rect().center
+
+	screen.blit(image,(state.x-center[0],state.y-center[1]))	
+	
 def main():
 	pygame.init()
 	screen = pygame.display.set_mode((1600,900))
 	done = False
 	clock = pygame.time.Clock()
 	
-	ship = particle.baryon()
-	ship_image = pygame.image.load('rocket_small_cute_lineart_neo.png')
-	missile_image = pygame.image.load('missile_square.png')
-	ship.update_image(ship_image,8)
-	#ship = particle.baryon('rocket_small_cute_lineart.png')
-	ship.move(0,0)
+	image_dict = load_images()
+	ship = particle.ship()
+	ship.update_image(image_dict['rocket'])
 	
 	entities = []
 	entities.append(ship)
 	
 	while not done: 
+	
+		pressed = pygame.key.get_pressed()
+	
+		alt_held = pressed[pygame.K_LALT] or pressed[pygame.K_RALT]
+		ctrl_held = pressed[pygame.K_LCTRL] or pressed[pygame.K_RCTRL]
+		
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				done = True
@@ -37,21 +54,20 @@ def main():
 				elif event.button == 3: # right click shrinks radius 
 					print 'balls'
 
-		pressed = pygame.key.get_pressed()
-		if pressed[pygame.K_UP]: particle.boost(ship)
-		if pressed[pygame.K_LEFT]: particle.torque_boost_left(ship) #ship.rot_left()
-		if pressed[pygame.K_RIGHT]: particle.torque_boost_right(ship) #ship.rot_right()
+		
+		if pressed[pygame.K_UP]: ship.boost()
+		if pressed[pygame.K_LEFT]: ship.rcs_left()
+		if pressed[pygame.K_RIGHT]: ship.rcs_right()
 		if pressed[pygame.K_SPACE]: 
-			missile = particle.fire(ship,missile_image)
-			entities.append(missile)
+			new_missile = ship.fire_missile()
+			new_missile.update_image(image_dict['missile'])
+			entities.append(new_missile)
 		
 		screen.fill((30,30,30))
 		hor,ver = screen.get_size()
 		for entity in entities:
-			particle.display(screen,entity)
+			display_particle(screen,entity)
 			entity.prop()
-			if entity.id == 1:
-				particle.boost(entity)
 		pygame.display.flip()
 		clock.tick(60)
 		
