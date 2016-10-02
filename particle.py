@@ -52,6 +52,7 @@ class ship(object):
 		rec = image.get_rect().size
 		self.image = pygame.transform.scale(image,(rec[0]/10,rec[1]/10))		
 		
+		
 	def prop(self):
 		self.state.prop()
 		
