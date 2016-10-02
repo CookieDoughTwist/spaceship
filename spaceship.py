@@ -6,8 +6,8 @@ import operations
 
 def load_images():
 	image_dict = dict()
-	image_dict['rocket'] = pygame.image.load('rocket_small_cute_lineart_neo.png')
-	image_dict['missile'] = pygame.image.load('missile_square.png')
+	image_dict['rocket'] = pygame.image.load('graphics/rocket_small_cute_lineart_neo.png')
+	image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
 	return image_dict
 
 def display_particle(screen,particle):
@@ -24,7 +24,7 @@ def main():
 	clock = pygame.time.Clock()
 	
 	image_dict = load_images()
-	ship = particle.ship()
+	ship = particle.ship(pygame.time.get_ticks())
 	ship.update_image(image_dict['rocket'])
 	
 	entities = []
@@ -61,9 +61,10 @@ def main():
 					   pressed[pygame.K_RCTRL]))
 
 		if pressed[pygame.K_SPACE]: 
-			new_missile = ship.fire_missile()
-			new_missile.update_image(image_dict['missile'])
-			entities.append(new_missile)
+			new_missile = ship.fire_missile(pygame.time.get_ticks())
+			if new_missile is not None:
+				new_missile.update_image(image_dict['missile'])
+				entities.append(new_missile)
 		
 		screen.fill((30,30,30))
 		hor,ver = screen.get_size()
