@@ -7,8 +7,7 @@ class engine(object):
 		self.entities = []
 		self.init_tick = init_tick
 		self.load_images()
-		self.ship = particle.ship(init_tick)
-		self.ship.update_image(self.image_dict['rocket'])
+		self.ship = particle.ship(init_tick,self.image_dict)
 		self.entities.append(self.ship)
 		
 	def load_images(self):
@@ -27,7 +26,6 @@ class engine(object):
 		if pressed[pygame.K_SPACE]: 
 			new_missile = self.ship.fire_missile(pygame.time.get_ticks())
 			if new_missile is not None:
-				new_missile.update_image(self.image_dict['missile'])
 				self.entities.append(new_missile)
 				
 		for entity in self.entities:

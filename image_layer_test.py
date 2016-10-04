@@ -1,30 +1,13 @@
 import pygame
-import math
-import particle
-import operations
-import spaceship
 
-
-def display_particle(screen,particle):
-	state = particle.state
-	image = particle.get_image()
-	center = image.get_rect().center
-
-	screen.blit(image,(state.x-center[0],state.y-center[1]))	
-	
-def paint_engine(screen,engine):
-	for entity in engine.entities:
-		display_particle(screen,entity)
-	
-	
 def main():
 	pygame.init()
 	screen = pygame.display.set_mode((1600,900))
 	done = False
 	clock = pygame.time.Clock()
 	
-	engine = spaceship.engine(pygame.time.get_ticks())
-	
+	image = pygame.image.load('graphics/andrew_rocket.png')
+	flame = pygame.image.load('graphics/lucy_flame.png')
 	while not done: 
 	
 		pressed = pygame.key.get_pressed()
@@ -47,12 +30,14 @@ def main():
 					print 'cheese'
 				elif event.button == 3: # right click shrinks radius 
 					print 'balls'
-		
-		engine.step(pygame.time.get_ticks(),pressed)
+
 		
 		screen.fill((30,30,30))
-		
-		paint_engine(screen,engine)
+		x = 0
+		y = -300
+		new_image = image.copy()
+		new_image.blit(flame,(575,1052))
+		screen.blit(new_image,(x,y))
 		pygame.display.flip()
 		clock.tick(60)
 		

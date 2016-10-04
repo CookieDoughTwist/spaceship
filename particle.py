@@ -40,19 +40,26 @@ baryonic_state.id = 0
 	
 class ship(object):
 	""" Holds ship data """
-	def __init__(self,init_ticks):		
+	def __init__(self,init_ticks,image_dict):		
 		self.thrust = .1
 		self.init_ticks = init_ticks
 		self.fire_cd = 1000 # miliseconds
 		self.last_fire = -float('inf')
 		
 		self.state = baryonic_state()		
+		self.left = False
+		self.right = False
 		
-	def update_image(self,image):
-		rec = image.get_rect().size
-		self.image = pygame.transform.scale(image,(rec[0]/10,rec[1]/10))		
+		self.image_dict = image_dict
 		
+		rocket_image = image_dict['rocket']
+		rec = rocket_image.get_rect().size
+		self.image = pygame.transform.scale(rocket_image,(rec[0]/10,rec[1]/10))
+		flame_image = image_dict['flame']
+		rec = flame_image.get_rect().size
+		self.flame_image = pygame.transform.scale(flame_image,(rec[0]/10,rec[1]/10))
 		
+
 	def prop(self):
 		self.state.prop()
 		
@@ -62,8 +69,11 @@ class ship(object):
 		#  (0,-1)  (0,0)  (0,1)
 		# (-1,-1) (-1,0) (-1,1)
 		direction = (commands[0] - commands[1], commands[3] - commands[2])
+		self.left = False
+		self.right = False
 		if (0,0) == direction:
 			return
+			
 			
 		if commands[4]:
 			# Ion thrusters
@@ -111,12 +121,14 @@ class ship(object):
 	def boost_left(self):
 		self.state.acc(self.thrust * math.cos(self.state.ori),
 					 - self.thrust * math.sin(self.state.ori))
-		self.state.rot_acc(.0005)
+		self.state.rot_acc(.00005)
+		self.right = True		
 		
 	def boost_right(self):
 		self.state.acc(self.thrust * math.cos(self.state.ori),
 					 - self.thrust * math.sin(self.state.ori))
-		self.state.rot_acc(-.0005)
+		self.state.rot_acc(-.00005)
+		self.left = True
 		
 	def boost_retro(self):
 		self.state.acc(- self.thrust/2 * math.cos(self.state.ori),
@@ -139,18 +151,28 @@ class ship(object):
 	def fire_missile(self,current_ticks):
 		if current_ticks-self.last_fire >= self.fire_cd:
 			self.last_fire = current_ticks
-			new_missile = missile()
+			new_missile = missile(self.image_dict)
 			new_missile.set_state(copy.copy(self.state))
 			return new_missile
 			
+	def get_image(self):
+		if self.left or self.right:
+			image = self.image.copy()
+			if self.left:
+				image.blit(self.flame_image,(427/10,1052/10))
+			if self.right:
+				image.blit(self.flame_image,(575/10,1052/10))
+			image = operations.rot_center(image,self.state.ori / (2*math.pi) * 360 - 90)		
+		else:
+			image = operations.rot_center(self.image,self.state.ori / (2*math.pi) * 360 - 90)		
+		return image
 		
 class missile(object):
 	"""Holds missile data """
-	def __init__(self):
+	def __init__(self,image_dict):
 		self.thrust = .5
-		self.state = baryonic_state()		
-
-	def update_image(self,image):
+		self.state = baryonic_state()	
+		image = image_dict['rocket']
 		rec = image.get_rect().size
 		self.image = pygame.transform.scale(image,(rec[0]/50,rec[1]/50))		
 		
@@ -164,6 +186,9 @@ class missile(object):
 	def boost(self):
 		self.state.vel_x += self.thrust * math.cos(self.state.ori)
 		self.state.vel_y -= self.thrust * math.sin(self.state.ori)
-
+		
+	def get_image(self):
+		image = operations.rot_center(self.image,self.state.ori / (2*math.pi) * 360 - 90)
+		return image
 
 	
