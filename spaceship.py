@@ -12,9 +12,9 @@ class engine(object):
 		
 	def load_images(self):
 		image_dict = dict()
-		image_dict['rocket'] = pygame.image.load('graphics/andrew_rocket.png')
+		image_dict['rocket'] = pygame.image.load('graphics/space_pod_export.png')
 		image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
-		image_dict['flame'] = pygame.image.load('graphics/lucy_flame.png')
+		image_dict['flame'] = pygame.image.load('graphics/space_pod_flame1.png')
 		self.image_dict = image_dict
 		
 	def step(self,cur_tick,pressed):

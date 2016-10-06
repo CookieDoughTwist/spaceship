@@ -54,10 +54,10 @@ class ship(object):
 		
 		rocket_image = image_dict['rocket']
 		rec = rocket_image.get_rect().size
-		self.image = pygame.transform.scale(rocket_image,(rec[0]/10,rec[1]/10))
+		self.image = pygame.transform.scale(rocket_image,(rec[0],rec[1]))
 		flame_image = image_dict['flame']
 		rec = flame_image.get_rect().size
-		self.flame_image = pygame.transform.scale(flame_image,(rec[0]/10,rec[1]/10))
+		self.flame_image = pygame.transform.scale(flame_image,(rec[0],rec[1]))
 		
 
 	def prop(self):
@@ -159,9 +159,9 @@ class ship(object):
 		if self.left or self.right:
 			image = self.image.copy()
 			if self.left:
-				image.blit(self.flame_image,(427/10,1052/10))
+				image.blit(self.flame_image,(27,62))
 			if self.right:
-				image.blit(self.flame_image,(575/10,1052/10))
+				image.blit(self.flame_image,(42,62))
 			image = operations.rot_center(image,self.state.ori / (2*math.pi) * 360 - 90)		
 		else:
 			image = operations.rot_center(self.image,self.state.ori / (2*math.pi) * 360 - 90)		

@@ -6,8 +6,8 @@ def main():
 	done = False
 	clock = pygame.time.Clock()
 	
-	image = pygame.image.load('graphics/andrew_rocket.png')
-	flame = pygame.image.load('graphics/lucy_flame.png')
+	image = pygame.image.load('graphics/Space Pod Export.png')
+	flame = pygame.image.load('graphics/Space Pod Flame1.png')
 	while not done: 
 	
 		pressed = pygame.key.get_pressed()
@@ -34,9 +34,9 @@ def main():
 		
 		screen.fill((30,30,30))
 		x = 0
-		y = -300
+		y = 0
 		new_image = image.copy()
-		new_image.blit(flame,(575,1052))
+		new_image.blit(flame,(43,62))
 		screen.blit(new_image,(x,y))
 		pygame.display.flip()
 		clock.tick(60)
