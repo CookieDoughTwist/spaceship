@@ -7,14 +7,19 @@ class engine(object):
 		self.entities = []
 		self.init_tick = init_tick
 		self.load_images()
-		self.ship = particle.ship(init_tick,self.image_dict)
+		self.ship = particle.flaming_falcon(init_tick,self.image_dict)
 		self.entities.append(self.ship)
 		
 	def load_images(self):
 		image_dict = dict()
-		image_dict['rocket'] = pygame.image.load('graphics/space_pod_export.png')
+		image_dict['rocket'] = pygame.image.load('graphics/andrew_rocket.png')
 		image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
-		image_dict['flame'] = pygame.image.load('graphics/space_pod_flame1.png')
+		image_dict['flame'] = pygame.image.load('graphics/lucy_flame.png')
+		image_dict['flaming_falcon'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon.png')
+		#image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
+		image_dict['flaming_falcon_flame_1'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_1.png')
+		image_dict['flaming_falcon_flame_2'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_2.png')
+		image_dict['flaming_falcon_flame_3'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_3.png')
 		self.image_dict = image_dict
 		
 	def step(self,cur_tick,pressed):
