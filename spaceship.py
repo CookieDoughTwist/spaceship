@@ -3,9 +3,11 @@ import pygame
 
 class engine(object):
 	""" Game Engine """
-	def __init__(self,init_tick):
+	def __init__(self,init_tick,step_freq):
 		self.entities = []
-		self.init_tick = init_tick
+		self.init_tick = init_tick	# ms
+		self.step_freq = step_freq	# Hz
+		self.n_steps = 0
 		self.load_images()
 		self.ship = particle.flaming_falcon(init_tick,self.image_dict)
 		self.entities.append(self.ship)
@@ -23,7 +25,12 @@ class engine(object):
 		self.image_dict = image_dict
 		
 	def step(self,cur_tick,pressed):
-		self.ship.maneuver((pressed[pygame.K_UP],
+		# Propagate all entities
+		for entity in self.entities:
+				entity.prop()
+			
+		# Process user input
+		self.ship.command((pressed[pygame.K_UP],
 					   pressed[pygame.K_DOWN],
 					   pressed[pygame.K_LEFT],
 					   pressed[pygame.K_RIGHT],
@@ -32,6 +39,14 @@ class engine(object):
 			new_missile = self.ship.fire_missile(pygame.time.get_ticks())
 			if new_missile is not None:
 				self.entities.append(new_missile)
-				
-		for entity in self.entities:
-			entity.prop()
+			
+		self.n_steps += 1
+			
+			
+			
+			
+			
+			
+			
+			
+			

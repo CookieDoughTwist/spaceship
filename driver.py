@@ -22,9 +22,10 @@ def main():
 	screen = pygame.display.set_mode((1600,900))
 	done = False
 	clock = pygame.time.Clock()
+	frame_rate = 60 # Hz
 	
-	engine = spaceship.engine(pygame.time.get_ticks())
-	
+	engine = spaceship.engine(pygame.time.get_ticks(),frame_rate)
+		
 	while not done: 
 	
 		pressed = pygame.key.get_pressed()
@@ -54,7 +55,7 @@ def main():
 		
 		paint_engine(screen,engine)
 		pygame.display.flip()
-		clock.tick(60)
+		clock.tick(frame_rate)
 		
 		
 main()
