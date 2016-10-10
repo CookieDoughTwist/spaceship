@@ -75,10 +75,11 @@ class baryonic_state(object):
 				 a * math.sin(ori))
 				 
 	def force_off(self,force,ori,r_sin_theta):
+		""" apply force not at center of gravity with given orientation """
+		# http://physics.stackexchange.com/questions/43232/force-applied-off-center-on-an-object
 		force_x = force * math.cos(ori)
 		force_y = force * math.sin(ori)
 		self.acc(force_x/self.mass,force_y/self.mass)
-		print r_sin_theta
 		torque = r_sin_theta * force
 		self.rot_acc(torque/self.mom_ine)
 	
