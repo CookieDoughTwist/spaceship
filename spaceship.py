@@ -23,19 +23,39 @@ class engine(object):
 		image_dict['flaming_falcon_flame_1'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_1.png')
 		image_dict['flaming_falcon_flame_2'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_2.png')
 		image_dict['flaming_falcon_flame_3'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_3.png')
+		image_dict['bullet'] = pygame.image.load('graphics/projectiles/bullets/tungsten_shell.png')
 		self.image_dict = image_dict
 		
-	def step(self,cur_tick,pressed):
+	def step(self,cur_tick,pressed,event_list):
 		# Propagate all entities
 		for entity in self.entities:
 				entity.prop()
 			
 		# Process user input
-		self.ship.command((pressed[pygame.K_w],
-					   pressed[pygame.K_s],
-					   pressed[pygame.K_a],
-					   pressed[pygame.K_d],
-					   pressed[pygame.K_RCTRL]))
+		wasd = [False,False,False,False] # up,down,left,right
+		rtfg = [False,False,False,False]
+		for event in event_list:
+			# Key downs first so that if both down and up happen,
+			# up can reset.
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_w:
+					wasd[0] = True
+				if event.key == pygame.K_s:
+					wasd[1] = True				
+				if event.key == pygame.K_a:
+					wasd[2] = True
+				if event.key == pygame.K_d:
+					wasd[3] = True	
+				if event.key == pygame.K_r:
+					rtfg[0] = True
+				if event.key == pygame.K_t:
+					rtfg[1] = True				
+				if event.key == pygame.K_f:
+					rtfg[2] = True
+				if event.key == pygame.K_g:
+					rtfg[3] = True	
+		
+		self.ship.command(wasd,rtfg)
 		if pressed[pygame.K_SPACE]: 
 			new_missile = self.ship.fire_missile(pygame.time.get_ticks())
 			if new_missile is not None:

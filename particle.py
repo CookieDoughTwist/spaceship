@@ -108,9 +108,18 @@ class flaming_falcon(object):
 		self.last_fire = -float('inf')
 		
 		self.state = baryonic_state()
+		
+		# Main thrusters
 		self.main = False
+		self.retro = False
 		self.left = False
 		self.right = False
+		
+		# RCS thrusters
+		self.bow_port = False
+		self.bow_star = False
+		self.stern_port = False
+		self.stern_star = False		
 		
 		mass = 50000
 		x_len = 100
@@ -155,81 +164,55 @@ class flaming_falcon(object):
 		
 		
 		
-	def command(self,commands):
-		""" commands = (up,down,left,right,ctrl) """
-		#  (1,-1)  (1,0)  (1,1)
-		#  (0,-1)  (0,0)  (0,1)
-		# (-1,-1) (-1,0) (-1,1)
-		direction = (commands[0] - commands[1], commands[3] - commands[2])
-		self.main = False
-		self.left = False
-		self.right = False
-		
-		if commands[4]:
-			# Ion thrusters
-			if (1,-1) == direction:
-				self.rcs_pro()
-			elif (1,0) == direction:
-				self.rcs_pro()
-			elif (1,1) == direction:
-				self.rcs_pro()
-			elif (0,-1) == direction:
-				self.rcs_left()
-			elif (0,1) == direction:
-				self.rcs_right()
-			elif (-1,-1) == direction:
-				self.rcs_retro()
-			elif (-1,0) == direction:
-				self.rcs_retro()
-			elif (-1,1) == direction:
-				self.rcs_retro()
+	def command(self,wasd,rtfg):
+		""" movement """
 			
-		else:
-			# Main thrusters
-			if commands[0]:
-				self.boost_pro();
-			if commands[1]:
-				self.boost_retro();
-			if commands[2]:
-				self.boost_left();
-			if commands[3]:
-				self.boost_right();
+		# Main thrusters
+		if wasd[0]:
+			self.boost_pro()
+		if wasd[1]:
+			self.boost_retro()
+		if wasd[2]:
+			self.boost_left()
+		if wasd[3]:
+			self.boost_right()		
+		
+		# RCS thrusters
+		if rtfg[0]:
+			self.rcs_bow_port()
+		if rtfg[1]:
+			self.rcs_bow_star()
+		if rtfg[2]:
+			self.rcs_stern_port()
+		if rtfg[3]:
+			self.rcs_stern_star()
+						
 				
 		
 	def boost_pro(self):
-		#self.state.force_cog(self.main_thrust,self.state.ori)
-		self.main = True
+		self.main = not self.main
 		
 	def boost_left(self):
-		# thrust = self.side_thrust/self.state.mass
-		# self.state.acc(self.side_thrust * math.cos(self.state.ori),
-					 # - self.side_thrust * math.sin(self.state.ori))
-		# self.state.rot_acc(.00005)
-		self.right = True		
+		self.left = not self.left		
 		
 	def boost_right(self):
-		# self.state.acc(self.side_thrust * math.cos(self.state.ori),
-					 # - self.side_thrust * math.sin(self.state.ori))
-		# self.state.rot_acc(-.00005)
-		self.left = True
+		self.right = not self.right
 		
 	def boost_retro(self):
-		self.state.acc(- self.rcs_thrust/2 * math.cos(self.state.ori),
-					     self.rcs_thrust/2 * math.sin(self.state.ori))
+		# NO RETRO
+		self.retro = not self.retro
+
+	def rcs_bow_port(self):
+		self.bow_port = not self.bow_port
 		
-	def rcs_pro(self):
-		self.state.acc(self.rcs_thrust/10 * math.cos(self.state.ori),
-					 - self.rcs_thrust/10 * math.sin(self.state.ori))
+	def rcs_bow_star(self):
+		self.bow_star = not self.bow_star
 		
-	def rcs_left(self):
-		self.state.rot_acc(.0001)
+	def rcs_stern_port(self):
+		self.stern_port = not self.stern_port
 		
-	def rcs_right(self):
-		self.state.rot_acc(-.0001)
-		
-	def rcs_retro(self):
-		self.state.acc(- self.rcs_thrust/10 * math.cos(self.state.ori),
-					     self.rcs_thrust/10 * math.sin(self.state.ori))
+	def rcs_stern_star(self):
+		self.stern_star = not self.stern_star	
 		
 	def fire_missile(self,current_ticks):
 		if current_ticks-self.last_fire >= self.fire_cd:

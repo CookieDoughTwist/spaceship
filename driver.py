@@ -57,7 +57,8 @@ def main():
 		alt_held = pressed[pygame.K_LALT] or pressed[pygame.K_RALT]
 		ctrl_held = pressed[pygame.K_LCTRL] or pressed[pygame.K_RCTRL]
 		
-		for event in pygame.event.get():
+		event_list = pygame.event.get()	
+		for event in event_list:
 			if event.type == pygame.QUIT:
 				done = True
 			# Closing Strokes
@@ -94,7 +95,7 @@ def main():
 		
 
 		
-		engine.step(pygame.time.get_ticks(),pressed)
+		engine.step(pygame.time.get_ticks(),pressed,event_list)
 		
 		screen.fill((30,30,30))
 		paint_grid(screen,screen_origin,grid_width)
