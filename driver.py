@@ -19,8 +19,8 @@ def paint_engine(screen,screen_origin,engine):
 def paint_grid(screen,screen_origin,grid_width):
 	w = screen.get_width()
 	h = screen.get_height()
-	x_offset = -(screen_origin[0] % grid_width)
-	y_offset = -(screen_origin[1] % grid_width)
+	x_offset = -(screen_origin[0] % grid_width)+grid_width
+	y_offset = -(screen_origin[1] % grid_width)+grid_width
 	for x in range(x_offset,w+x_offset,grid_width):
 		vertical_line = pygame.Surface((1, h), pygame.SRCALPHA)
 		vertical_line.fill((0, 255, 0, 30))
@@ -36,8 +36,10 @@ def paint_dot(screen,screen_origin,pos):
 def main():
 	pygame.init()
 	screen_origin = (-27,-23)
-	grid_width = 50 # bits
-	screen = pygame.display.set_mode((1600,900))
+	grid_width = 50 # bits	
+	dis_info = pygame.display.Info()	
+	#screen = pygame.display.set_mode((dis_info.current_w, dis_info.current_h))
+	screen = pygame.display.set_mode((dis_info.current_w, dis_info.current_h),pygame.FULLSCREEN)
 	done = False
 	clock = pygame.time.Clock()
 	frame_rate = 60 # Hz
