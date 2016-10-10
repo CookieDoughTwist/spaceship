@@ -30,10 +30,10 @@ class engine(object):
 				entity.prop()
 			
 		# Process user input
-		self.ship.command((pressed[pygame.K_UP],
-					   pressed[pygame.K_DOWN],
-					   pressed[pygame.K_LEFT],
-					   pressed[pygame.K_RIGHT],
+		self.ship.command((pressed[pygame.K_w],
+					   pressed[pygame.K_s],
+					   pressed[pygame.K_a],
+					   pressed[pygame.K_d],
 					   pressed[pygame.K_RCTRL]))
 		if pressed[pygame.K_SPACE]: 
 			new_missile = self.ship.fire_missile(pygame.time.get_ticks())

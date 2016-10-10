@@ -35,7 +35,7 @@ def paint_dot(screen,screen_origin,pos):
 	
 def main():
 	pygame.init()
-	screen_origin = (-27,-23)
+	screen_origin = [-27,-23]
 	grid_width = 50 # bits	
 	dis_info = pygame.display.Info()	
 	#screen = pygame.display.set_mode((dis_info.current_w, dis_info.current_h))
@@ -68,6 +68,15 @@ def main():
 					print 'cheese'
 				elif event.button == 3: # right click shrinks radius 
 					print 'balls'
+		
+		if pressed[pygame.K_UP]:
+			screen_origin[1] -= 10
+		if pressed[pygame.K_DOWN]:
+			screen_origin[1] += 10
+		if pressed[pygame.K_LEFT]:
+			screen_origin[0] -= 10
+		if pressed[pygame.K_RIGHT]:
+			screen_origin[0] += 10
 		
 		engine.step(pygame.time.get_ticks(),pressed)
 		
