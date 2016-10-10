@@ -66,14 +66,14 @@ def main():
 					return
 				if event.key == pygame.K_F4 and alt_held:
 					return	
+				if event.key == pygame.K_y:
+					lock_screen = not lock_screen								
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if event.button == 1: # left click grows radius 
 					print 'cheese'
 				elif event.button == 3: # right click shrinks radius 
 					print 'balls'
 		
-		if pressed[pygame.K_y]:
-			lock_screen = not lock_screen
 		if lock_screen:
 			w = screen.get_width()
 			h = screen.get_height()

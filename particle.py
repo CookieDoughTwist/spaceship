@@ -87,6 +87,12 @@ class baryonic_state(object):
 		self.force_cog(force_n,p_ang)
 		force_t = force*math.sin(off_ang) # torsional force
 		self.torque(r * force_t)
+		# print r,force_t,force_n
+		# print f_ang,p_ang,off_ang
+		# print self.ori,self.vel_ori
+		
+		
+	
 		
 
 baryonic_state.id = 0		
@@ -141,10 +147,11 @@ class flaming_falcon(object):
 		if self.main:
 			self.state.force_cog(self.main_thrust,self.state.ori)
 		if self.left:
-			self.state.force_off(self.side_thrust,self.state.ori,self.left_theta,self.left_r)
-		if self.right:
-			#self.state.force_off(self.side_thrust,self.state.ori,self.right_r_sin_theta)
-			self.state.force_off(self.side_thrust,self.state.ori,self.right_theta,self.right_r)
+			self.state.force_off(self.side_thrust,self.state.ori,\
+			self.left_theta+self.state.ori,self.left_r)
+		if self.right:			
+			self.state.force_off(self.side_thrust,self.state.ori,\
+			self.right_theta+self.state.ori,self.right_r)
 		
 		
 		
