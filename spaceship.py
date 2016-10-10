@@ -11,6 +11,7 @@ class engine(object):
 		self.load_images()
 		self.ship = particle.flaming_falcon(init_tick,self.image_dict)
 		self.entities.append(self.ship)
+		self.focus = self.ship
 		
 	def load_images(self):
 		image_dict = dict()

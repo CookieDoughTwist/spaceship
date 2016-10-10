@@ -7,10 +7,14 @@ import spaceship
 
 def display_particle(screen,screen_origin,particle):
 	state = particle.state
+	x_m = state.x # meters
+	y_m = state.y # meters
+	x = x_m*5
+	y = y_m*5
 	image = particle.get_image()
 	center = image.get_rect().center
 
-	screen.blit(image,(state.x-center[0]-screen_origin[0],state.y-center[1]-screen_origin[1]))	
+	screen.blit(image,(x-center[0]-screen_origin[0],y-center[1]-screen_origin[1]))	
 	
 def paint_engine(screen,screen_origin,engine):
 	for entity in engine.entities:
@@ -36,7 +40,8 @@ def paint_dot(screen,screen_origin,pos):
 def main():
 	pygame.init()
 	screen_origin = [-27,-23]
-	grid_width = 50 # bits	
+	lock_screen = False
+	grid_width = 500 # bits	
 	dis_info = pygame.display.Info()	
 	#screen = pygame.display.set_mode((dis_info.current_w, dis_info.current_h))
 	screen = pygame.display.set_mode((dis_info.current_w, dis_info.current_h),pygame.FULLSCREEN)
@@ -60,23 +65,34 @@ def main():
 				if event.key == pygame.K_w and ctrl_held:
 					return
 				if event.key == pygame.K_F4 and alt_held:
-					return
-				if event.key == pygame.K_ESCAPE:
-					return			
+					return	
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if event.button == 1: # left click grows radius 
 					print 'cheese'
 				elif event.button == 3: # right click shrinks radius 
 					print 'balls'
 		
-		if pressed[pygame.K_UP]:
-			screen_origin[1] -= 10
-		if pressed[pygame.K_DOWN]:
-			screen_origin[1] += 10
-		if pressed[pygame.K_LEFT]:
-			screen_origin[0] -= 10
-		if pressed[pygame.K_RIGHT]:
-			screen_origin[0] += 10
+		if pressed[pygame.K_y]:
+			lock_screen = not lock_screen
+		if lock_screen:
+			w = screen.get_width()
+			h = screen.get_height()
+			x_m = engine.focus.state.x
+			y_m = engine.focus.state.y
+			x = int(x_m*5-w/2)
+			y = int(y_m*5-h/2)
+			screen_origin = [x,y]
+		else:
+			if pressed[pygame.K_UP]:
+				screen_origin[1] -= 10
+			if pressed[pygame.K_DOWN]:
+				screen_origin[1] += 10
+			if pressed[pygame.K_LEFT]:
+				screen_origin[0] -= 10
+			if pressed[pygame.K_RIGHT]:
+				screen_origin[0] += 10
+		
+
 		
 		engine.step(pygame.time.get_ticks(),pressed)
 		

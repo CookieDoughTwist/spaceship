@@ -10,8 +10,8 @@ class baryonic_state(object):
 		baryonic_state.id += 1
 		self.parent_id = parent_id
 		
-		self.x = 200		# m
-		self.y = 200		# m
+		self.x = 100		# m
+		self.y = 100		# m
 		self.vel_x = 0		# m/s
 		self.vel_y = 0		# m/s
 		self.acc_x = 0		# m/s^2
@@ -74,15 +74,19 @@ class baryonic_state(object):
 		self.acc(a * math.cos(ori),
 				 a * math.sin(ori))
 				 
-	def force_off(self,force,ori,r_sin_theta):
-		""" apply force not at center of gravity with given orientation """
-		# http://physics.stackexchange.com/questions/43232/force-applied-off-center-on-an-object
-		force_x = force * math.cos(ori)
-		force_y = force * math.sin(ori)
-		self.acc(force_x/self.mass,force_y/self.mass)
-		torque = r_sin_theta * force
+	def torque(self,torque):
 		self.rot_acc(torque/self.mom_ine)
-	
+				 		          
+	def force_off(self,force,f_ang,p_ang,r):
+		""" apply force not at center of gravity with given orientation """
+		# f_ang = clockwise angle of force
+		# p_ang = clockwise angle of contact point
+		# http://physics.stackexchange.com/questions/43232/force-applied-off-center-on-an-object
+		off_ang = f_ang-p_ang
+		force_n = force*math.cos(off_ang) # normal force		
+		self.force_cog(force_n,p_ang)
+		force_t = force*math.sin(off_ang) # torsional force
+		self.torque(r * force_t)
 		
 
 baryonic_state.id = 0		
@@ -105,16 +109,16 @@ class flaming_falcon(object):
 		mass = 50000
 		x_len = 100
 		y_len = 250
+				
+		left_x = 250-365
+		left_y = 216-250
+		self.left_r = math.sqrt(math.pow(left_x,2)+math.pow(left_y,2))
+		self.left_theta = math.atan2(left_y,left_x)
 		
-		left_x = 216-250
-		left_y = 365-250
-		left_r = math.sqrt(math.pow(left_x,2)+math.pow(left_y,2))
-		self.left_r_sin_theta = left_x/left_r
-		
-		right_x = 283-250
-		right_y = 365-250
-		right_r = math.sqrt(math.pow(right_x,2)+math.pow(right_y,2))
-		self.right_r_sin_theta = right_x/right_r
+		right_x = 250-365
+		right_y = 283-250
+		self.right_r = math.sqrt(math.pow(right_x,2)+math.pow(right_y,2))
+		self.right_theta = math.atan2(right_y,right_x)
 				
 		self.state.set_mass(mass)
 		self.state.set_mom_ine(mass*(x_len*x_len+y_len*y_len)/12)
@@ -137,9 +141,10 @@ class flaming_falcon(object):
 		if self.main:
 			self.state.force_cog(self.main_thrust,self.state.ori)
 		if self.left:
-			self.state.force_off(self.side_thrust,self.state.ori,self.left_r_sin_theta)
+			self.state.force_off(self.side_thrust,self.state.ori,self.left_theta,self.left_r)
 		if self.right:
-			self.state.force_off(self.side_thrust,self.state.ori,self.right_r_sin_theta)
+			#self.state.force_off(self.side_thrust,self.state.ori,self.right_r_sin_theta)
+			self.state.force_off(self.side_thrust,self.state.ori,self.right_theta,self.right_r)
 		
 		
 		
@@ -235,9 +240,9 @@ class flaming_falcon(object):
 				image.blit(self.flame_image_3,(209,364))
 			if self.right:
 				image.blit(self.flame_image_3,(276,364))
-			image = operations.rot_center(image,self.state.ori / (2*math.pi) * 360 - 90)		
+			image = operations.rot_center(image,-self.state.ori / (2*math.pi) * 360 - 90)		
 		else:
-			image = operations.rot_center(self.image,self.state.ori / (2*math.pi) * 360 - 90)		
+			image = operations.rot_center(self.image,-self.state.ori / (2*math.pi) * 360 - 90)		
 		return image
 
 class ship(object):
