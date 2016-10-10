@@ -87,9 +87,10 @@ class baryonic_state(object):
 		self.force_cog(force_n,p_ang)
 		force_t = force*math.sin(off_ang) # torsional force
 		self.torque(r * force_t)
-		# print r,force_t,force_n
-		# print f_ang,p_ang,off_ang
-		# print self.ori,self.vel_ori
+		print 'force_off'
+		print r,force_t,force_n
+		print f_ang,p_ang,off_ang
+		print self.ori,self.vel_ori
 		
 		
 	
@@ -102,7 +103,7 @@ class flaming_falcon(object):
 	def __init__(self,init_ticks,image_dict):		
 		self.main_thrust = 50000
 		self.side_thrust = 10000
-		self.rcs_thrust = .01
+		self.rcs_thrust = 10000
 		self.init_ticks = init_ticks
 		self.fire_cd = 1000 # miliseconds
 		self.last_fire = -float('inf')
@@ -134,18 +135,35 @@ class flaming_falcon(object):
 		right_y = 283-250
 		self.right_r = math.sqrt(math.pow(right_x,2)+math.pow(right_y,2))
 		self.right_theta = math.atan2(right_y,right_x)
-				
+		
+		front_rcs_x = 250-175
+		back_rcs_x = 250-325
+		left_hull_y = 216-250
+		right_hull_y = 283-250
+		
+		
+		self.rcs_r = math.sqrt(front_rcs_x*front_rcs_x+right_hull_y*right_hull_y)
+		self.bow_port_theta = math.atan2(left_hull_y,front_rcs_x)
+		self.bow_star_theta = math.atan2(right_hull_y,front_rcs_x)
+		self.stern_port_theta = math.atan2(left_hull_y,back_rcs_x)
+		self.stern_star_theta = math.atan2(right_hull_y,back_rcs_x)
+		
 		self.state.set_mass(mass)
 		self.state.set_mom_ine(mass*(x_len*x_len+y_len*y_len)/12)
 		
 		self.image_dict = image_dict
 		
-		# Resize Images
+		# Save image pointers
 		self.image = image_dict['flaming_falcon']
 		
 		self.flame_image_1 = image_dict['flaming_falcon_flame_1']
 		self.flame_image_2 = image_dict['flaming_falcon_flame_2']
 		self.flame_image_3 = image_dict['flaming_falcon_flame_3']
+		rcs_exhaust_image = image_dict['medium_rcs']
+		self.left_rcs_exhaust_image = \
+			operations.rot_center(rcs_exhaust_image,-90)
+		self.right_rcs_exhaust_image = \
+			operations.rot_center(rcs_exhaust_image,90)
 
 	def prop(self):
 		# Propagate object based on current state
@@ -161,7 +179,22 @@ class flaming_falcon(object):
 		if self.right:			
 			self.state.force_off(self.side_thrust,self.state.ori,\
 			self.right_theta+self.state.ori,self.right_r)
-		
+		if self.bow_port:			
+			thrust_ori = self.state.ori+math.pi/2
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.bow_port_theta+self.state.ori,self.rcs_r)
+		if self.bow_star:
+			thrust_ori = self.state.ori-math.pi/2
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.bow_star_theta+self.state.ori,self.rcs_r)
+		if self.stern_port:
+			thrust_ori = self.state.ori+math.pi/2
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.stern_port_theta+self.state.ori,self.rcs_r)
+		if self.stern_star:
+			thrust_ori = self.state.ori-math.pi/2
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.stern_star_theta+self.state.ori,self.rcs_r)
 		
 		
 	def command(self,wasd,rtfg):
@@ -222,146 +255,30 @@ class flaming_falcon(object):
 			return new_missile
 			
 	def get_image(self):
-		if self.main or self.left or self.right:
-			image = self.image.copy()
-			if self.main:
-				image.blit(self.flame_image_1,(227,367))
-			if self.left:
-				image.blit(self.flame_image_3,(209,364))
-			if self.right:
-				image.blit(self.flame_image_3,(276,364))
-			image = operations.rot_center(image,-self.state.ori / (2*math.pi) * 360 - 90)		
-		else:
-			image = operations.rot_center(self.image,-self.state.ori / (2*math.pi) * 360 - 90)		
-		return image
-
-class ship(object):
-	""" Holds ship data """
-	def __init__(self,init_ticks,image_dict):		
-		self.thrust = .1
-		self.init_ticks = init_ticks
-		self.fire_cd = 1000 # miliseconds
-		self.last_fire = -float('inf')
-		
-		self.state = baryonic_state()		
-		self.left = False
-		self.right = False
-		
-		self.image_dict = image_dict
-		
-		rocket_image = image_dict['rocket']
-		rec = rocket_image.get_rect().size
-		self.image = pygame.transform.scale(rocket_image,(rec[0],rec[1]))
-		flame_image = image_dict['flame']
-		rec = flame_image.get_rect().size
-		self.flame_image = pygame.transform.scale(flame_image,(rec[0],rec[1]))
-		
-
-	def prop(self):
-		self.state.prop()
-		
-	def maneuver(self,commands):
-		""" commands = (up,down,left,right,ctrl) """
-		#  (1,-1)  (1,0)  (1,1)
-		#  (0,-1)  (0,0)  (0,1)
-		# (-1,-1) (-1,0) (-1,1)
-		direction = (commands[0] - commands[1], commands[3] - commands[2])
-		self.left = False
-		self.right = False
-		if (0,0) == direction:
-			return
+		#image = self.image.copy()
+		rect = self.image.get_rect()
+		image = pygame.Surface((rect[2],rect[3]),pygame.SRCALPHA)
 			
+		if self.main:
+			image.blit(self.flame_image_1,(227,367))
+		if self.left:
+			image.blit(self.flame_image_3,(209,364))
+		if self.right:
+			image.blit(self.flame_image_3,(276,364))
+		if self.bow_port:
+			image.blit(self.left_rcs_exhaust_image,(176,150))
+		if self.bow_star:
+			image.blit(self.right_rcs_exhaust_image,(284,150))
+		if self.stern_port:
+			image.blit(self.left_rcs_exhaust_image,(176,300))
+		if self.stern_star:
+			image.blit(self.right_rcs_exhaust_image,(284,300))
 			
-		if commands[4]:
-			# Ion thrusters
-			if (1,-1) == direction:
-				self.rcs_pro()
-			elif (1,0) == direction:
-				self.rcs_pro()
-			elif (1,1) == direction:
-				self.rcs_pro()
-			elif (0,-1) == direction:
-				self.rcs_left()
-			elif (0,1) == direction:
-				self.rcs_right()
-			elif (-1,-1) == direction:
-				self.rcs_retro()
-			elif (-1,0) == direction:
-				self.rcs_retro()
-			elif (-1,1) == direction:
-				self.rcs_retro()
-			
-		else:
-			# Main thrusters
-			if (1,-1) == direction:
-				self.boost_pro()
-			elif (1,0) == direction:
-				self.boost_pro()
-			elif (1,1) == direction:
-				self.boost_pro()
-			elif (0,-1) == direction:
-				self.boost_left()
-			elif (0,1) == direction:
-				self.boost_right()
-			elif (-1,-1) == direction:
-				self.boost_retro()
-			elif (-1,0) == direction:
-				self.boost_retro()
-			elif (-1,1) == direction:
-				self.boost_retro()
-				
+		image.blit(self.image,(0,0))
 		
-	def boost_pro(self):
-		self.boost_left()
-		self.boost_right()
-		
-	def boost_left(self):
-		self.state.acc(self.thrust * math.cos(self.state.ori),
-					 - self.thrust * math.sin(self.state.ori))
-		self.state.rot_acc(.00005)
-		self.right = True		
-		
-	def boost_right(self):
-		self.state.acc(self.thrust * math.cos(self.state.ori),
-					 - self.thrust * math.sin(self.state.ori))
-		self.state.rot_acc(-.00005)
-		self.left = True
-		
-	def boost_retro(self):
-		self.state.acc(- self.thrust/2 * math.cos(self.state.ori),
-					     self.thrust/2 * math.sin(self.state.ori))
-		
-	def rcs_pro(self):
-		self.state.acc(self.thrust/10 * math.cos(self.state.ori),
-					 - self.thrust/10 * math.sin(self.state.ori))
-		
-	def rcs_left(self):
-		self.state.rot_acc(.0001)
-		
-	def rcs_right(self):
-		self.state.rot_acc(-.0001)
-		
-	def rcs_retro(self):
-		self.state.acc(- self.thrust/10 * math.cos(self.state.ori),
-					     self.thrust/10 * math.sin(self.state.ori))
-		
-	def fire_missile(self,current_ticks):
-		if current_ticks-self.last_fire >= self.fire_cd:
-			self.last_fire = current_ticks
-			new_missile = missile(self.image_dict)
-			new_missile.set_state(copy.copy(self.state))
-			return new_missile
-			
-	def get_image(self):
-		if self.left or self.right:
-			image = self.image.copy()
-			if self.left:
-				image.blit(self.flame_image,(27,62))
-			if self.right:
-				image.blit(self.flame_image,(42,62))
-			image = operations.rot_center(image,self.state.ori / (2*math.pi) * 360 - 90)		
-		else:
-			image = operations.rot_center(self.image,self.state.ori / (2*math.pi) * 360 - 90)		
+		image = operations.rot_center(image,\
+			-self.state.ori / (2*math.pi) * 360 - 90)		
+	
 		return image
 		
 class missile(object):

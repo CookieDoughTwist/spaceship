@@ -24,6 +24,7 @@ class engine(object):
 		image_dict['flaming_falcon_flame_2'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_2.png')
 		image_dict['flaming_falcon_flame_3'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_3.png')
 		image_dict['bullet'] = pygame.image.load('graphics/projectiles/bullets/tungsten_shell.png')
+		image_dict['medium_rcs'] = pygame.image.load('graphics/thrusters/medium_grey_inverted_thrusters.png')
 		self.image_dict = image_dict
 		
 	def step(self,cur_tick,pressed,event_list):
