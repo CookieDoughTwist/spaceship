@@ -12,15 +12,15 @@ class baryonic_state(object):
 		
 		self.x = 100		# m
 		self.y = 100		# m
-		self.vel_x = 0		# m/s
-		self.vel_y = 0		# m/s
-		self.acc_x = 0		# m/s^2
-		self.acc_y = 0		# m/s^2
-		self.ori = 0		# rad
-		self.vel_ori = 0	# rad/s	
-		self.acc_ori = 0	# rad/s^2
-		self.mass = 1		# kg
-		self.mom_ine = 1	# kg*m^2
+		self.vel_x = 0.0		# m/s
+		self.vel_y = 0.0		# m/s
+		self.acc_x = 0.0		# m/s^2
+		self.acc_y = 0.0		# m/s^2
+		self.ori = 0.0		# rad
+		self.vel_ori = 0.0	# rad/s	
+		self.acc_ori = 0.0	# rad/s^2
+		self.mass = 1.0		# kg
+		self.mom_ine = 1.0	# kg*m^2
 		
 		self.step_dur = 1/step_freq # s
 	
@@ -57,16 +57,22 @@ class baryonic_state(object):
 		self.vel_x += self.acc_x*self.step_dur
 		self.vel_y += self.acc_y*self.step_dur
 		self.vel_ori += self.acc_ori*self.step_dur
-		
+		# print 'prop'
+		# print self.vel_x,self.vel_y
+		# print self.acc_x,self.acc_y
+		# Reset accelerations
+		self.acc_x = 0.0
+		self.acc_y = 0.0
+		self.acc_ori= 0.0
 		
 	def acc(self,ddx,ddy):
 		""" accelerate """
-		self.vel_x += ddx
-		self.vel_y += ddy
+		self.acc_x += ddx
+		self.acc_y += ddy
 		
 	def rot_acc(self,ddori):
 		""" rotationally accelerate """
-		self.vel_ori += ddori
+		self.acc_ori += ddori
 		
 	def force_cog(self,force,ori):
 		""" apply force at center of gravity with given orientation """
@@ -87,10 +93,10 @@ class baryonic_state(object):
 		self.force_cog(force_n,p_ang)
 		force_t = force*math.sin(off_ang) # torsional force
 		self.torque(r * force_t)
-		print 'force_off'
-		print r,force_t,force_n
-		print f_ang,p_ang,off_ang
-		print self.ori,self.vel_ori
+		# print 'force_off'
+		# print r,force_t,force_n
+		# print f_ang,p_ang,off_ang
+		# print self.ori,self.vel_ori
 		
 		
 	
@@ -100,13 +106,14 @@ baryonic_state.id = 0
 	
 class flaming_falcon(object):
 	""" Holds ship data """
-	def __init__(self,init_ticks,image_dict):		
-		self.main_thrust = 50000
-		self.side_thrust = 10000
-		self.rcs_thrust = 10000
-		self.init_ticks = init_ticks
-		self.fire_cd = 1000 # miliseconds
-		self.last_fire = -float('inf')
+	def __init__(self,init_step,image_dict):		
+		self.main_thrust = 500000
+		self.side_thrust = 100000
+		self.rcs_thrust = 100000
+		self.init_step = init_step
+		self.current_step = init_step
+		self.fire_cd = 1 # seconds
+		self.fire_last = -float('inf')
 		
 		self.state = baryonic_state()
 		
@@ -155,7 +162,7 @@ class flaming_falcon(object):
 		
 		# Save image pointers
 		self.image = image_dict['flaming_falcon']
-		
+		self.gun_image = image_dict['flaming_falcon_gun']
 		self.flame_image_1 = image_dict['flaming_falcon_flame_1']
 		self.flame_image_2 = image_dict['flaming_falcon_flame_2']
 		self.flame_image_3 = image_dict['flaming_falcon_flame_3']
@@ -165,7 +172,8 @@ class flaming_falcon(object):
 		self.right_rcs_exhaust_image = \
 			operations.rot_center(rcs_exhaust_image,90)
 
-	def prop(self):
+	def prop(self,current_step):
+		self.current_step = current_step
 		# Propagate object based on current state
 		# Constant acceleration over interval assumed
 		self.state.prop()
@@ -219,9 +227,7 @@ class flaming_falcon(object):
 			self.rcs_stern_port()
 		if rtfg[3]:
 			self.rcs_stern_star()
-						
-				
-		
+								
 	def boost_pro(self):
 		self.main = not self.main
 		
@@ -247,15 +253,29 @@ class flaming_falcon(object):
 	def rcs_stern_star(self):
 		self.stern_star = not self.stern_star	
 		
-	def fire_missile(self,current_ticks):
-		if current_ticks-self.last_fire >= self.fire_cd:
-			self.last_fire = current_ticks
-			new_missile = missile(self.image_dict)
-			new_missile.set_state(copy.copy(self.state))
-			return new_missile
+	def fire_main_gun(self):
+		if self.current_step - self.fire_last >= self.fire_cd*60: # 60 step/second
+			self.fire_last = self.current_step
+			new_proj = bullet(self.current_step,self.image_dict)
+			new_state = new_proj.state
+			ori = self.state.ori
+			aft = 26 # meters
+			new_state.set_pos(aft*math.cos(ori)+self.state.x,\
+			                  aft*math.sin(ori)+self.state.y)	
+			new_state.set_ori(self.state.ori)
+			muzzle_vel = 1000
+			new_state.set_vel(muzzle_vel*math.cos(ori)+self.state.vel_x,\
+							  muzzle_vel*math.sin(ori)+self.state.vel_y)
+			return new_proj
+		
+	# def fire_missile(self,current_ticks):
+		# if current_ticks-self.last_fire >= self.fire_cd:
+			# self.last_fire = current_ticks
+			# new_missile = missile(self.image_dict)
+			# new_missile.set_state(copy.copy(self.state))
+			# return new_missile
 			
 	def get_image(self):
-		#image = self.image.copy()
 		rect = self.image.get_rect()
 		image = pygame.Surface((rect[2],rect[3]),pygame.SRCALPHA)
 			
@@ -273,7 +293,7 @@ class flaming_falcon(object):
 			image.blit(self.left_rcs_exhaust_image,(176,300))
 		if self.stern_star:
 			image.blit(self.right_rcs_exhaust_image,(284,300))
-			
+		image.blit(self.gun_image,(247,125))
 		image.blit(self.image,(0,0))
 		
 		image = operations.rot_center(image,\
@@ -281,8 +301,25 @@ class flaming_falcon(object):
 	
 		return image
 		
+class bullet(object):
+	""" Holds bullet data """
+	def __init__(self,init_step,image_dict):
+		self.state = baryonic_state()
+		self.image = image_dict['bullet']
+		self.init_step = init_step
+		self.current_step = init_step
+		
+	def prop(self,current_step):
+		self.current_step = current_step
+		self.state.prop()
+
+	def get_image(self):		
+		image = operations.rot_center(self.image,\
+			-self.state.ori / (2*math.pi) * 360 - 90)
+		return image
+		
 class missile(object):
-	"""Holds missile data """
+	""" Holds missile data """
 	def __init__(self,image_dict):
 		self.thrust = .5
 		self.state = baryonic_state()	

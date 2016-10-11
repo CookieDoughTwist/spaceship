@@ -13,8 +13,17 @@ def display_particle(screen,screen_origin,particle):
 	y = y_m*5
 	image = particle.get_image()
 	center = image.get_rect().center
+	x_bit = x-center[0]-screen_origin[0]
+	y_bit = y-center[1]-screen_origin[1]	
+	rect = image.get_rect()	
+	
+	# Do not paint things out of bounds
+	if x_bit+rect[2] >= 0 and \
+	   x_bit <= screen.get_width() and \
+	   y_bit+rect[3] >= 0 and \
+	   y_bit <= screen.get_height():
+		screen.blit(image,(x_bit,y_bit))	
 
-	screen.blit(image,(x-center[0]-screen_origin[0],y-center[1]-screen_origin[1]))	
 	
 def paint_engine(screen,screen_origin,engine):
 	for entity in engine.entities:

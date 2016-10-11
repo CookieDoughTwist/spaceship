@@ -9,7 +9,7 @@ class engine(object):
 		self.step_freq = step_freq	# Hz
 		self.n_steps = 0
 		self.load_images()
-		self.ship = particle.flaming_falcon(init_tick,self.image_dict)
+		self.ship = particle.flaming_falcon(self.n_steps,self.image_dict)
 		self.entities.append(self.ship)
 		self.focus = self.ship
 		
@@ -19,6 +19,7 @@ class engine(object):
 		image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
 		image_dict['flame'] = pygame.image.load('graphics/lucy_flame.png')
 		image_dict['flaming_falcon'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon.png')
+		image_dict['flaming_falcon_gun'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_gun.png')
 		#image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
 		image_dict['flaming_falcon_flame_1'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_1.png')
 		image_dict['flaming_falcon_flame_2'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_2.png')
@@ -30,7 +31,7 @@ class engine(object):
 	def step(self,cur_tick,pressed,event_list):
 		# Propagate all entities
 		for entity in self.entities:
-				entity.prop()
+			entity.prop(self.n_steps)
 			
 		# Process user input
 		wasd = [False,False,False,False] # up,down,left,right
@@ -58,9 +59,9 @@ class engine(object):
 		
 		self.ship.command(wasd,rtfg)
 		if pressed[pygame.K_SPACE]: 
-			new_missile = self.ship.fire_missile(pygame.time.get_ticks())
-			if new_missile is not None:
-				self.entities.append(new_missile)
+			new_proj = self.ship.fire_main_gun()
+			if new_proj is not None:
+				self.entities.append(new_proj)
 			
 		self.n_steps += 1
 			
