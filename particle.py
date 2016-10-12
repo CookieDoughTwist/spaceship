@@ -107,12 +107,12 @@ baryonic_state.id = 0
 class flaming_falcon(object):
 	""" Holds ship data """
 	def __init__(self,init_step,image_dict):		
-		self.main_thrust = 500000
-		self.side_thrust = 100000
-		self.rcs_thrust = 100000
+		self.main_thrust = 1e6
+		self.side_thrust = 1e5
+		self.rcs_thrust = 1e5
 		self.init_step = init_step
 		self.current_step = init_step
-		self.fire_cd = 1 # seconds
+		self.fire_cd = 1.0 # seconds
 		self.fire_last = -float('inf')
 		
 		self.state = baryonic_state()
@@ -259,7 +259,7 @@ class flaming_falcon(object):
 			new_proj = bullet(self.current_step,self.image_dict)
 			new_state = new_proj.state
 			ori = self.state.ori
-			aft = 26 # meters
+			aft = 27 # meters
 			new_state.set_pos(aft*math.cos(ori)+self.state.x,\
 			                  aft*math.sin(ori)+self.state.y)	
 			new_state.set_ori(self.state.ori)
@@ -276,9 +276,14 @@ class flaming_falcon(object):
 			# return new_missile
 			
 	def get_image(self):
+		# Lower x is toward the left (port) side of the ship
+		# Higher x is toward the right (starboard) side of the ship
+		# Lower y is toward the front (bow) side of the ship
+		# Higher y is toward the back (stern) side of the ship
 		rect = self.image.get_rect()
+		# Create a new surface for image
 		image = pygame.Surface((rect[2],rect[3]),pygame.SRCALPHA)
-			
+		# Paint exhaust trails
 		if self.main:
 			image.blit(self.flame_image_1,(227,367))
 		if self.left:
@@ -293,7 +298,11 @@ class flaming_falcon(object):
 			image.blit(self.left_rcs_exhaust_image,(176,300))
 		if self.stern_star:
 			image.blit(self.right_rcs_exhaust_image,(284,300))
-		image.blit(self.gun_image,(247,125))
+		# Paint main gun
+		fire_period = 0.25 # seconds
+		fire_progress = min((self.current_step-self.fire_last)/(fire_period*60),1.0)
+		recoil_coef = math.sin(fire_progress*math.pi)
+		image.blit(self.gun_image,(247,115+15*recoil_coef)) # y = 115 is home position
 		image.blit(self.image,(0,0))
 		
 		image = operations.rot_center(image,\

@@ -15,12 +15,9 @@ class engine(object):
 		
 	def load_images(self):
 		image_dict = dict()
-		image_dict['rocket'] = pygame.image.load('graphics/andrew_rocket.png')
-		image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
-		image_dict['flame'] = pygame.image.load('graphics/lucy_flame.png')
+		image_dict['missile'] = pygame.image.load('graphics/projectiles/missiles/generic_missile.png')
 		image_dict['flaming_falcon'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon.png')
-		image_dict['flaming_falcon_gun'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_gun.png')
-		#image_dict['missile'] = pygame.image.load('graphics/lucy_rocket_sleeping.png')
+		image_dict['flaming_falcon_gun'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_gun.png')		
 		image_dict['flaming_falcon_flame_1'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_1.png')
 		image_dict['flaming_falcon_flame_2'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_2.png')
 		image_dict['flaming_falcon_flame_3'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_3.png')
