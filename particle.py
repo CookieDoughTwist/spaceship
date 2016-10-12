@@ -166,6 +166,7 @@ class flaming_falcon(object):
 		self.flame_image_1 = image_dict['flaming_falcon_flame_1']
 		self.flame_image_2 = image_dict['flaming_falcon_flame_2']
 		self.flame_image_3 = image_dict['flaming_falcon_flame_3']
+		self.bullet_flare = image_dict['bullet_flare']
 		rcs_exhaust_image = image_dict['medium_rcs']
 		self.left_rcs_exhaust_image = \
 			operations.rot_center(rcs_exhaust_image,-90)
@@ -301,6 +302,8 @@ class flaming_falcon(object):
 		# Paint main gun
 		fire_period = 0.25 # seconds
 		fire_progress = min((self.current_step-self.fire_last)/(fire_period*60),1.0)
+		if fire_progress == 0:
+			image.blit(self.bullet_flare,(241,89))
 		recoil_coef = math.sin(fire_progress*math.pi)
 		image.blit(self.gun_image,(247,115+15*recoil_coef)) # y = 115 is home position
 		image.blit(self.image,(0,0))
