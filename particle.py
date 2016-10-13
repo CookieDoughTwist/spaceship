@@ -56,10 +56,7 @@ class baryonic_state(object):
 		# Propagate velocity
 		self.vel_x += self.acc_x*self.step_dur
 		self.vel_y += self.acc_y*self.step_dur
-		self.vel_ori += self.acc_ori*self.step_dur
-		# print 'prop'
-		# print self.vel_x,self.vel_y
-		# print self.acc_x,self.acc_y
+		self.vel_ori += self.acc_ori*self.step_dur		
 		# Reset accelerations
 		self.acc_x = 0.0
 		self.acc_y = 0.0
@@ -87,20 +84,11 @@ class baryonic_state(object):
 		""" apply force not at center of gravity with given orientation """
 		# f_ang = clockwise angle of force
 		# p_ang = clockwise angle of contact point
-		# http://physics.stackexchange.com/questions/43232/force-applied-off-center-on-an-object
+		# http://physics.stackexchange.com/questions/43232/force-applied-off-center-on-an-object		
+		self.force_cog(force,f_ang)
 		off_ang = f_ang-p_ang
-		force_n = force*math.cos(off_ang) # normal force		
-		self.force_cog(force_n,p_ang)
 		force_t = force*math.sin(off_ang) # torsional force
 		self.torque(r * force_t)
-		# print 'force_off'
-		# print r,force_t,force_n
-		# print f_ang,p_ang,off_ang
-		# print self.ori,self.vel_ori
-		
-		
-	
-		
 
 baryonic_state.id = 0		
 	
