@@ -291,7 +291,7 @@ class flaming_falcon(object):
 		fire_period = 0.25 # seconds
 		fire_progress = min((self.current_step-self.fire_last)/(fire_period*60),1.0)
 		if fire_progress <= .1:
-			image.blit(self.bullet_flare,(241,89))
+			image.blit(self.bullet_flare,(241,93))
 		recoil_coef = math.sin(fire_progress*math.pi)
 		image.blit(self.gun_image,(247,115+15*recoil_coef)) # y = 115 is home position
 		image.blit(self.image,(0,0))
