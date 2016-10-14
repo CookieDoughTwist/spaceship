@@ -115,7 +115,11 @@ class flaming_falcon(object):
 		self.bow_port = False
 		self.bow_star = False
 		self.stern_port = False
-		self.stern_star = False		
+		self.stern_star = False	
+		self.bow_port_fore = False
+		self.bow_star_fore = False
+		self.stern_port_aft = False
+		self.stern_star_aft = False
 		
 		mass = 50000
 		x_len = 100
@@ -160,7 +164,10 @@ class flaming_falcon(object):
 			operations.rot_center(rcs_exhaust_image,-90)
 		self.right_rcs_exhaust_image = \
 			operations.rot_center(rcs_exhaust_image,90)
-
+		self.fore_rcs_exhaust_image = \
+			operations.rot_center(rcs_exhaust_image,180)
+		self.aft_rcs_exhaust_image = rcs_exhaust_image
+			
 	def prop(self,current_step):
 		self.current_step = current_step
 		# Propagate object based on current state
@@ -192,9 +199,27 @@ class flaming_falcon(object):
 			thrust_ori = self.state.ori-math.pi/2
 			self.state.force_off(self.rcs_thrust,thrust_ori,\
 			self.stern_star_theta+self.state.ori,self.rcs_r)
-		
-		
-	def command(self,wasd,rtfg):
+		# The following recycles the ratios of the main side thrusters
+		# because lazy and they might be moved often
+		# The fore left right is flipped to take advantage of symmetry.
+		if self.bow_port_fore:
+			thrust_ori = self.state.ori+math.pi
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.right_theta+self.state.ori+math.pi,self.left_r)
+		if self.bow_star_fore:
+			thrust_ori = self.state.ori+math.pi
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.left_theta+self.state.ori+math.pi,self.right_r)
+		if self.stern_port_aft:
+			thrust_ori = self.state.ori
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.left_theta+self.state.ori,self.left_r)
+		if self.stern_star_aft:
+			thrust_ori = self.state.ori
+			self.state.force_off(self.rcs_thrust,thrust_ori,\
+			self.right_theta+self.state.ori,self.right_r)
+			
+	def command(self,wasd,rtfg,shift):
 		""" movement """
 			
 		# Main thrusters
@@ -208,14 +233,24 @@ class flaming_falcon(object):
 			self.boost_right()		
 		
 		# RCS thrusters
-		if rtfg[0]:
-			self.rcs_bow_port()
-		if rtfg[1]:
-			self.rcs_bow_star()
-		if rtfg[2]:
-			self.rcs_stern_port()
-		if rtfg[3]:
-			self.rcs_stern_star()
+		if shift:
+			if rtfg[0]:
+				self.rcs_bow_port_fore()
+			if rtfg[1]:
+				self.rcs_bow_star_fore()
+			if rtfg[2]:
+				self.rcs_stern_port_aft()
+			if rtfg[3]:
+				self.rcs_stern_star_aft()
+		else:		
+			if rtfg[0]:
+				self.rcs_bow_port()
+			if rtfg[1]:
+				self.rcs_bow_star()
+			if rtfg[2]:
+				self.rcs_stern_port()
+			if rtfg[3]:
+				self.rcs_stern_star()
 								
 	def boost_pro(self):
 		self.main = not self.main
@@ -242,6 +277,18 @@ class flaming_falcon(object):
 	def rcs_stern_star(self):
 		self.stern_star = not self.stern_star	
 		
+	def rcs_bow_port_fore(self):
+		self.bow_port_fore = not self.bow_port_fore
+		
+	def rcs_bow_star_fore(self):
+		self.bow_star_fore = not self.bow_star_fore
+		
+	def rcs_stern_port_aft(self):
+		self.stern_port_aft = not self.stern_port_aft
+	
+	def rcs_stern_star_aft(self):
+		self.stern_star_aft = not self.stern_star_aft
+
 	def fire_main_gun(self):
 		if self.current_step - self.fire_last >= self.fire_cd*60: # 60 step/second
 			self.fire_last = self.current_step
@@ -256,14 +303,7 @@ class flaming_falcon(object):
 			new_state.set_vel(muzzle_vel*math.cos(ori)+self.state.vel_x,\
 							  muzzle_vel*math.sin(ori)+self.state.vel_y)
 			return new_proj
-		
-	# def fire_missile(self,current_ticks):
-		# if current_ticks-self.last_fire >= self.fire_cd:
-			# self.last_fire = current_ticks
-			# new_missile = missile(self.image_dict)
-			# new_missile.set_state(copy.copy(self.state))
-			# return new_missile
-			
+					
 	def get_image(self):
 		# Lower x is toward the left (port) side of the ship
 		# Higher x is toward the right (starboard) side of the ship
@@ -287,6 +327,15 @@ class flaming_falcon(object):
 			image.blit(self.left_rcs_exhaust_image,(176,300))
 		if self.stern_star:
 			image.blit(self.right_rcs_exhaust_image,(284,300))
+		if self.bow_port_fore:
+			image.blit(self.fore_rcs_exhaust_image,(205,100))
+		if self.bow_star_fore:
+			image.blit(self.fore_rcs_exhaust_image,(255,100))
+		if self.stern_port_aft:
+			image.blit(self.aft_rcs_exhaust_image,(205,345))
+		if self.stern_star_aft:
+			image.blit(self.aft_rcs_exhaust_image,(255,345))
+		
 		# Paint main gun
 		fire_period = 0.25 # seconds
 		fire_progress = min((self.current_step-self.fire_last)/(fire_period*60),1.0)

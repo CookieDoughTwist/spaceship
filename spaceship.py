@@ -55,8 +55,8 @@ class engine(object):
 					rtfg[2] = True
 				if event.key == pygame.K_g:
 					rtfg[3] = True	
-		
-		self.ship.command(wasd,rtfg)
+		shift = pressed[pygame.K_RSHIFT] or pressed[pygame.K_LSHIFT]
+		self.ship.command(wasd,rtfg,shift)
 		if pressed[pygame.K_SPACE]: 
 			new_proj = self.ship.fire_main_gun()
 			if new_proj is not None:
