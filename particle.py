@@ -90,6 +90,12 @@ class baryonic_state(object):
 		force_t = force*math.sin(off_ang) # torsional force
 		self.torque(r * force_t)
 
+	def impulse(self,mom_mag,ori):
+		""" imparts momentum """
+		vel_mag = mom_mag/self.mass
+		self.vel_x += vel_mag*math.cos(ori)
+		self.vel_y += vel_mag*math.sin(ori)
+		
 baryonic_state.id = 0		
 	
 class flaming_falcon(object):
@@ -121,9 +127,9 @@ class flaming_falcon(object):
 		self.stern_port_aft = False
 		self.stern_star_aft = False
 		
-		mass = 50000
-		x_len = 100
-		y_len = 250
+		mass = 50000	# kg
+		x_len = 100		# m
+		y_len = 250		# m
 				
 		left_x = 250-365
 		left_y = 216-250
@@ -299,7 +305,7 @@ class flaming_falcon(object):
 			new_state.set_pos(aft*math.cos(ori)+self.state.x,\
 			                  aft*math.sin(ori)+self.state.y)	
 			new_state.set_ori(self.state.ori)
-			muzzle_vel = 1000
+			muzzle_vel = 100
 			new_state.set_vel(muzzle_vel*math.cos(ori)+self.state.vel_x,\
 							  muzzle_vel*math.sin(ori)+self.state.vel_y)
 			return new_proj
@@ -391,4 +397,17 @@ class missile(object):
 		image = operations.rot_center(self.image,self.state.ori / (2*math.pi) * 360 - 90)
 		return image
 
+class hyper_neutron(object):
+	""" Holds neutron data """
+	def __init__(self,init_step,image_dict):
+		self.state = baryonic_state()
+		self.state.set_mass(400)
+		self.image = image_dict['hyper_neutron']
+		
+	def prop(self,current_step):
+		self.state.prop()
 	
+	def get_image(self):
+		return self.image
+		
+		

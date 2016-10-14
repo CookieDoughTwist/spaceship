@@ -25,8 +25,14 @@ class engine(object):
 		image_dict['bullet'] = pygame.image.load('graphics/projectiles/bullets/tungsten_shell.png')
 		image_dict['bullet_flare'] = pygame.image.load('graphics/projectiles/bullets/tungsten_shell_flare.png')
 		image_dict['medium_rcs'] = pygame.image.load('graphics/thrusters/medium_grey_inverted_thrusters.png')
+		image_dict['hyper_neutron'] = pygame.image.load('graphics/doodads/hyper_neutron.png')
 		self.image_dict = image_dict
-		
+	
+	def place_hyper_neutron(self,coor):
+		new_neutron = particle.hyper_neutron(self.n_steps,self.image_dict)
+		new_neutron.state.set_pos(coor[0],coor[1])
+		self.entities.append(new_neutron)
+	
 	def step(self,cur_tick,pressed,event_list):
 		# Propagate all entities
 		for entity in self.entities:

@@ -60,6 +60,8 @@ def main():
 	
 	engine = spaceship.engine(pygame.time.get_ticks(),frame_rate)
 		
+	engine.place_hyper_neutron((310,103))
+		
 	while not done: 
 	
 		pressed = pygame.key.get_pressed()
