@@ -10,13 +10,15 @@ class pygame_wrapper(object):
 		pygame.init()
 		dis_info = pygame.display.Info()
 		self.screen_dim = [dis_info.current_w, dis_info.current_h]
-		self.screen_center = [self.screen_dim[0]/2,self.screen_dim[1]/2]
+		self.screen_center = [self.screen_dim[0]/2,self.screen_dim[1]/2] # bits
 		self.screen = pygame.display.set_mode(\
 			self.screen_dim,pygame.FULLSCREEN)
 		self.clock = pygame.time.Clock()
 		self.frame_rate = 60 # Hz
 		self.screen_ori = 0 # radians
 		self.bits_per_meter = 5
+		
+		self.scroll_spd = 10 # bits/frame
 		self.lock_screen = False
 		self.lock_ori = False
 		self.grid_width = 100 # meters
@@ -70,16 +72,27 @@ class pygame_wrapper(object):
 			y = int(self.engine.focus.state.y*self.bits_per_meter)
 			self.screen_center = [x,y]
 		else:
-			if pressed[pygame.K_UP]:
-				self.screen_center[1] -= 10
-			if pressed[pygame.K_DOWN]:
-				self.screen_center[1] += 10
-			if pressed[pygame.K_LEFT]:
-				self.screen_center[0] -= 10
-			if pressed[pygame.K_RIGHT]:
-				self.screen_center[0] += 10
-		
-
+			mouse_pos = pygame.mouse.get_pos()
+			if mouse_pos[1] <= 0 or pressed[pygame.K_UP]:
+				dx = int(self.scroll_spd*math.sin(math.pi-self.screen_ori))
+				dy = int(self.scroll_spd*math.cos(math.pi-self.screen_ori))				
+				self.screen_center[0] += dx
+				self.screen_center[1] += dy
+			if mouse_pos[1] >= self.screen_dim[1]-1 or pressed[pygame.K_DOWN]:				
+				dx = int(self.scroll_spd*math.sin(math.pi-self.screen_ori))
+				dy = int(self.scroll_spd*math.cos(math.pi-self.screen_ori))				
+				self.screen_center[0] -= dx
+				self.screen_center[1] -= dy
+			if mouse_pos[0] <= 0 or pressed[pygame.K_LEFT]:
+				dx = int(self.scroll_spd*math.cos(self.screen_ori))
+				dy = int(self.scroll_spd*math.sin(self.screen_ori))				
+				self.screen_center[0] -= dx
+				self.screen_center[1] -= dy
+			if mouse_pos[0] >= self.screen_dim[0]-1 or pressed[pygame.K_RIGHT]:
+				dx = int(self.scroll_spd*math.cos(self.screen_ori))
+				dy = int(self.scroll_spd*math.sin(self.screen_ori))				
+				self.screen_center[0] += dx
+				self.screen_center[1] += dy
 		
 		self.engine.step(pygame.time.get_ticks(),pressed,event_list)
 		
