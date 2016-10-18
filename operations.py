@@ -1,6 +1,5 @@
 import pygame
 import math
-import numpy as np
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size"""
@@ -13,5 +12,21 @@ def rot_center(image, angle):
 	
 def rot_matrix(theta):
 	""" clockwise angle rotation matrix """
-	return np.matrix((( math.cos(theta),math.sin(theta)),
-			          (-math.sin(theta),math.cos(theta))))
+	return (( math.cos(theta),math.sin(theta)),
+		    (-math.sin(theta),math.cos(theta)))
+					  
+def matrix_op(matrix,arr):
+	return (arr[0]*matrix[0][0]+arr[1]*matrix[0][1],\
+			arr[0]*matrix[1][0]+arr[1]*matrix[1][1])
+			
+def arr_add(arr0,arr1):
+	return (arr0[0]+arr1[0],arr0[1]+arr1[1])
+	
+def arr_sub(arr0,arr1):
+	return (arr0[0]-arr1[0],arr0[1]-arr1[1])
+	
+def vert_intercept(line,x):	
+	if line[1][0]-line[0][0] == 0:
+		return None
+	slope = (line[1][1]-line[0][1])/(line[1][0]-line[0][0])
+	return x*slope+line[1][1]-line[1][0]*slope

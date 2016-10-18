@@ -310,7 +310,7 @@ class flaming_falcon(object):
 							  muzzle_vel*math.sin(ori)+self.state.vel_y)
 			return new_proj
 					
-	def get_image(self):
+	def get_image(self,offset_ori):
 		# Lower x is toward the left (port) side of the ship
 		# Higher x is toward the right (starboard) side of the ship
 		# Lower y is toward the front (bow) side of the ship
@@ -352,7 +352,7 @@ class flaming_falcon(object):
 		image.blit(self.image,(0,0))
 		
 		image = operations.rot_center(image,\
-			-self.state.ori / (2*math.pi) * 360 - 90)		
+			-(self.state.ori+offset_ori) / (2*math.pi) * 360 - 90)		
 	
 		return image
 		
@@ -368,9 +368,9 @@ class bullet(object):
 		self.current_step = current_step
 		self.state.prop()
 
-	def get_image(self):		
+	def get_image(self,offset_ori):		
 		image = operations.rot_center(self.image,\
-			-self.state.ori / (2*math.pi) * 360 - 90)
+			-(self.state.ori+offset_ori) / (2*math.pi) * 360 - 90)
 		return image
 		
 class missile(object):
@@ -407,7 +407,7 @@ class hyper_neutron(object):
 	def prop(self,current_step):
 		self.state.prop()
 	
-	def get_image(self):
+	def get_image(self,offset_ori):
 		return self.image
 		
 		
