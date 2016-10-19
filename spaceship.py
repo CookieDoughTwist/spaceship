@@ -26,6 +26,9 @@ class engine(object):
 		image_dict['bullet_flare'] = pygame.image.load('graphics/projectiles/bullets/tungsten_shell_flare.png')
 		image_dict['medium_rcs'] = pygame.image.load('graphics/thrusters/medium_grey_inverted_thrusters.png')
 		image_dict['hyper_neutron'] = pygame.image.load('graphics/doodads/hyper_neutron.png')
+		
+		# UI
+		image_dict['pause'] = pygame.image.load('graphics/UI/PAUSED.png')
 		self.image_dict = image_dict
 	
 	def place_hyper_neutron(self,coor):

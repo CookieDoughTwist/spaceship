@@ -22,6 +22,7 @@ class pygame_wrapper(object):
 		self.lock_screen = False
 		self.lock_ori = False
 		self.grid_width = 100 # meters
+		self.game_paused = False
 		
 		self.engine = spaceship.engine(\
 			pygame.time.get_ticks(),self.frame_rate)
@@ -38,23 +39,27 @@ class pygame_wrapper(object):
 		for event in event_list:
 			if event.type == pygame.QUIT:
 				self.stop = True
-				return
-			# Closing Strokes
+				return			
 			if event.type == pygame.KEYDOWN:
+				# Closing Strokes
 				if event.key == pygame.K_w and ctrl_held:
 					self.stop = True
 					return
 				if event.key == pygame.K_F4 and alt_held:
 					self.stop = True
 					return
+				# Toggle Settings
 				if event.key == pygame.K_y:
 					self.lock_screen = not self.lock_screen								
 				if event.key == pygame.K_u:
-					self.lock_ori = not self.lock_ori
+					self.lock_ori = not self.lock_ori					
+				# Game Pause
+				if event.key == pygame.K_ESCAPE:
+					self.game_paused = not self.game_paused
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if event.button == 1: # left click grows radius 
+				if event.button == 1:
 					print 'cheese'
-				elif event.button == 3: # right click shrinks radius 
+				elif event.button == 3: 
 					print 'balls'
 		
 		if self.lock_ori:
@@ -94,12 +99,20 @@ class pygame_wrapper(object):
 				self.screen_center[0] += dx
 				self.screen_center[1] += dy
 		
-		self.engine.step(pygame.time.get_ticks(),pressed,event_list)
+		if not self.game_paused:		
+			self.engine.step(pygame.time.get_ticks(),pressed,event_list)
+			
+		# TODO: move image_dict to driver!!!!! 10/17/16 -AW
+		
+		
+		# TODO: consolidate coordinate paint functions 10/17/16 -AW
 		
 		self.screen.fill((30,30,30))
 		self.paint_grid()
-		#self.paint_dot((0,0))
 		self.paint_engine()
+		# Paint UI
+		if self.game_paused:
+			self.paint_pause()
 		pygame.display.flip()
 		self.clock.tick(self.frame_rate)
 		
@@ -160,13 +173,16 @@ class pygame_wrapper(object):
 			dis_loc = op.arr_sub(dis_loc,image_center_offset)
 			self.screen.blit(image,dis_loc)
 			
-	def paint_dot(self,pos):
-		screen_origin = self.get_screen_origin()
-		pygame.draw.circle(self.screen,(255,0,0),(pos[0]-screen_origin[0],pos[1]-screen_origin[1]),10)
-
 	def get_screen_origin(self):
 		return (self.screen_center[0]-self.screen_dim[0]/2,\
 				self.screen_center[1]-self.screen_dim[1]/2)
+	
+	def paint_pause(self):			
+		center_offset = (self.screen_dim[0]/2,self.screen_dim[1]/2)
+		image = self.engine.image_dict['pause']
+		image_center_offset = image.get_rect().center
+		dis_loc = op.arr_sub(center_offset,image_center_offset)		
+		self.screen.blit(image,dis_loc)
 	
 	def get_screen_corners(self):
 		rot_mat = op.rot_matrix(self.screen_ori)
