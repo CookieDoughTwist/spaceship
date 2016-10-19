@@ -232,7 +232,7 @@ class flaming_falcon(object):
 			self.right_theta+self.state.ori,self.right_r)
 			
 		# Gun
-		open_rate = 0.25 # Hz
+		open_rate = 1.0 # Hz
 		# TODO: hard coding! (for example 60 is for frames/second) 10/19/16 -AW
 		if self.open_gun_port:
 			if self.open_frac < 1.0:
