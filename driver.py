@@ -107,7 +107,8 @@ class pygame_wrapper(object):
 		
 		# TODO: consolidate coordinate paint functions 10/17/16 -AW
 		
-		self.screen.fill((30,30,30))
+		#self.screen.fill((30,30,30))
+		self.screen.fill((150,150,150))
 		self.paint_grid()
 		self.paint_engine()
 		# Paint UI

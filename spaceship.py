@@ -16,7 +16,9 @@ class engine(object):
 	def load_images(self):
 		image_dict = dict()
 		image_dict['missile'] = pygame.image.load('graphics/projectiles/missiles/generic_missile.png')
-		image_dict['flaming_falcon'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon.png')
+		image_dict['flaming_falcon_body'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_body.png')
+		image_dict['flaming_falcon_left_nose'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_left_nose.png')
+		image_dict['flaming_falcon_right_nose'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_right_nose.png')
 		#image_dict['flaming_falcon'] = pygame.image.load('graphics/shields/hex shield example.png')
 		image_dict['flaming_falcon_gun'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_gun.png')		
 		image_dict['flaming_falcon_flame_1'] = pygame.image.load('graphics/ships/flaming_falcon/flaming_falcon_flame_1.png')
@@ -44,6 +46,7 @@ class engine(object):
 		# Process user input
 		wasd = [False,False,False,False] # up,down,left,right
 		rtfg = [False,False,False,False]
+		e = False
 		for event in event_list:
 			# Key downs first so that if both down and up happen,
 			# up can reset.
@@ -64,8 +67,10 @@ class engine(object):
 					rtfg[2] = True
 				if event.key == pygame.K_g:
 					rtfg[3] = True	
+				if event.key == pygame.K_e:
+					e = True
 		shift = pressed[pygame.K_RSHIFT] or pressed[pygame.K_LSHIFT]
-		self.ship.command(wasd,rtfg,shift)
+		self.ship.command(wasd,rtfg,shift,e)
 		if pressed[pygame.K_SPACE]: 
 			new_proj = self.ship.fire_main_gun()
 			if new_proj is not None:

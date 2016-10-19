@@ -127,6 +127,10 @@ class flaming_falcon(object):
 		self.stern_port_aft = False
 		self.stern_star_aft = False
 		
+		# Gun port
+		self.open_gun_port = False
+		self.open_frac = 0.0
+		
 		mass = 50000	# kg
 		x_len = 100		# m
 		y_len = 250		# m
@@ -159,7 +163,9 @@ class flaming_falcon(object):
 		self.image_dict = image_dict
 		
 		# Save image pointers
-		self.image = image_dict['flaming_falcon']
+		self.base_image = image_dict['flaming_falcon_body']
+		self.left_nose_image = image_dict['flaming_falcon_left_nose']
+		self.right_nose_image = image_dict['flaming_falcon_right_nose']
 		self.gun_image = image_dict['flaming_falcon_gun']
 		self.flame_image_1 = image_dict['flaming_falcon_flame_1']
 		self.flame_image_2 = image_dict['flaming_falcon_flame_2']
@@ -225,7 +231,22 @@ class flaming_falcon(object):
 			self.state.force_off(self.rcs_thrust,thrust_ori,\
 			self.right_theta+self.state.ori,self.right_r)
 			
-	def command(self,wasd,rtfg,shift):
+		# Gun
+		open_rate = 0.25 # Hz
+		# TODO: hard coding! (for example 60 is for frames/second) 10/19/16 -AW
+		if self.open_gun_port:
+			if self.open_frac < 1.0:
+				self.open_frac += open_rate/60
+				if self.open_frac > 1.0:
+					self.open_frac = 1.0				
+		elif self.open_frac > 0.0:
+			self.open_frac -= open_rate/60
+			if self.open_frac < 0.0:
+				self.open_frac = 0.0
+			
+			
+			
+	def command(self,wasd,rtfg,shift,e):
 		""" movement """
 			
 		# Main thrusters
@@ -257,7 +278,11 @@ class flaming_falcon(object):
 				self.rcs_stern_port()
 			if rtfg[3]:
 				self.rcs_stern_star()
-								
+
+		# Gun
+		if e:
+			self.open_gun_port = not self.open_gun_port
+		
 	def boost_pro(self):
 		self.main = not self.main
 		
@@ -296,7 +321,7 @@ class flaming_falcon(object):
 		self.stern_star_aft = not self.stern_star_aft
 
 	def fire_main_gun(self):
-		if self.current_step - self.fire_last >= self.fire_cd*60: # 60 step/second
+		if self.open_frac >= 1.0 and self.current_step - self.fire_last >= self.fire_cd*60: # 60 step/second
 			self.fire_last = self.current_step
 			new_proj = bullet(self.current_step,self.image_dict)
 			new_state = new_proj.state
@@ -315,7 +340,7 @@ class flaming_falcon(object):
 		# Higher x is toward the right (starboard) side of the ship
 		# Lower y is toward the front (bow) side of the ship
 		# Higher y is toward the back (stern) side of the ship
-		rect = self.image.get_rect()
+		rect = self.base_image.get_rect()
 		# Create a new surface for image
 		image = pygame.Surface((rect[2],rect[3]),pygame.SRCALPHA)
 		# Paint exhaust trails
@@ -344,12 +369,22 @@ class flaming_falcon(object):
 		
 		# Paint main gun
 		fire_period = 0.25 # seconds
+		# TODO: hard coding! (for example 60 is for frames/second) 10/19/16 -AW
 		fire_progress = min((self.current_step-self.fire_last)/(fire_period*60),1.0)
 		if fire_progress <= .1:
 			image.blit(self.bullet_flare,(241,93))
 		recoil_coef = math.sin(fire_progress*math.pi)
 		image.blit(self.gun_image,(247,115+15*recoil_coef)) # y = 115 is home position
-		image.blit(self.image,(0,0))
+				
+		# Paint ship base chasis
+		image.blit(self.base_image,(0,0))
+		
+		# Paint nose cone
+		# int() required to sync both sides of the animation due to int rounding after the add/sub
+		open_offset_x = int(self.open_frac * 10) # bits 
+		open_offset_y = int(self.open_frac * 20) # bits
+		image.blit(self.left_nose_image,(216-open_offset_x,58+open_offset_y))		
+		image.blit(self.right_nose_image,(250+open_offset_x,58+open_offset_y))
 		
 		image = operations.rot_center(image,\
 			-(self.state.ori+offset_ori) / (2*math.pi) * 360 - 90)		
