@@ -13,6 +13,7 @@ class pygame_wrapper(object):
 		self.screen_center = [self.screen_dim[0]/2,self.screen_dim[1]/2] # bits
 		self.screen = pygame.display.set_mode(\
 			self.screen_dim,pygame.FULLSCREEN)
+		#self.screen = pygame.display.set_mode([1800,1000])
 		self.clock = pygame.time.Clock()
 		self.frame_rate = 60 # Hz
 		self.screen_ori = 0 # radians
@@ -118,7 +119,7 @@ class pygame_wrapper(object):
 		self.clock.tick(self.frame_rate)
 		
 	def paint_grid(self):
-		# TODO: double comuting happening between here and paint_engine; consider merge 10/17/16 -AW
+		# TODO: double computing happening between here and paint_engine; consider merge 10/17/16 -AW
 		center_offset = (self.screen_dim[0]/2,self.screen_dim[1]/2)
 		rot_mat = op.rot_matrix(self.screen_ori)
 		
@@ -196,7 +197,9 @@ class pygame_wrapper(object):
 	
 def main():
 	driver = pygame_wrapper()
-	driver.engine.place_hyper_neutron((200,103))
+	driver.engine.place_hyper_box((200,103))
+	driver.engine.place_hyper_box((195,98))
+	#driver.engine.place_hyper_neutron((200,103))
 	#driver.engine.place_hyper_neutron((0,0))	
 	while not driver.stop:
 		driver.step()		

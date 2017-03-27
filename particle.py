@@ -23,6 +23,12 @@ class baryonic_state(object):
 		self.mom_ine = 1.0	# kg*m^2
 		
 		self.step_dur = 1/step_freq # s
+		
+		self.hitbox = (( 10, 10),
+					   (-10, 10),
+					   (-10,-10),
+					   ( 10,-10)) # default square 
+
 	
 	def set_pos(self,x,y):
 		self.x = x
@@ -95,6 +101,36 @@ class baryonic_state(object):
 		vel_mag = mom_mag/self.mass
 		self.vel_x += vel_mag*math.cos(ori)
 		self.vel_y += vel_mag*math.sin(ori)
+	
+	def cur_hitbox(self):
+		""" calculates current hitbox """
+		hitbox_out = operations.cloud_add(self.hitbox,(self.x,self.y))
+		hitbox_out = operations.cloud_matrix_op(operations.rot_matrix(self.ori),hitbox_out)	
+		return hitbox_out
+		
+	def col(self,other):
+		""" test for collision """
+		# TODO: need to do reverse polygon check
+		contact = False
+		cur_hitbox = self.cur_hitbox()
+		other_hitbox = other.cur_hitbox()
+		#print 'ids: %d %d' % (self.id,other.id)
+		for i in range(len(other_hitbox)):
+			if operations.in_bounds(cur_hitbox,other_hitbox[i]):
+				contact = True
+				break
+			
+		if contact:
+			pos_vec = (self.x-other.x,self.y-other.y)
+			pos_ori = operations.vec2ori(pos_vec)
+			self.force_cog(100,pos_ori)
+			other.force_cog(-100,pos_ori)
+			#print 'ids: %d %d' % (self.id,other.id)
+			#print 'self: %f %f' % (self.x,self.y)		
+			#print 'other: %f %f' % (other.x,other.y)
+			#print pos_ori	
+			
+			
 		
 baryonic_state.id = 0		
 	
@@ -399,6 +435,11 @@ class bullet(object):
 		self.init_step = init_step
 		self.current_step = init_step
 		
+		self.state.hitbox = (( .2, 1),
+					         (-.2, 1),
+					         (-.2,-1),
+					         ( .2,-1))
+		
 	def prop(self,current_step):
 		self.current_step = current_step
 		self.state.prop()
@@ -445,4 +486,15 @@ class hyper_neutron(object):
 	def get_image(self,offset_ori):
 		return self.image
 		
+class hyper_box(object):
+	""" Holds box data """
+	def __init__(self,init_step,image_dict):
+		self.state = baryonic_state()
+		self.state.set_mass(100)
+		self.image = image_dict['hyper_box']
 		
+	def prop(self,current_step):
+		self.state.prop()
+		
+	def get_image(self,offset_ori):
+		return self.image

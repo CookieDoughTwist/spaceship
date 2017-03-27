@@ -28,6 +28,7 @@ class engine(object):
 		image_dict['bullet_flare'] = pygame.image.load('graphics/projectiles/bullets/tungsten_shell_flare.png')
 		image_dict['medium_rcs'] = pygame.image.load('graphics/thrusters/medium_grey_inverted_thrusters.png')
 		image_dict['hyper_neutron'] = pygame.image.load('graphics/doodads/hyper_neutron.png')
+		image_dict['hyper_box'] = pygame.image.load('graphics/doodads/hyper_box.png')
 		
 		# UI
 		image_dict['pause'] = pygame.image.load('graphics/UI/PAUSED.png')
@@ -37,11 +38,21 @@ class engine(object):
 		new_neutron = particle.hyper_neutron(self.n_steps,self.image_dict)
 		new_neutron.state.set_pos(coor[0],coor[1])
 		self.entities.append(new_neutron)
+		
+	def place_hyper_box(self,coor):
+		new_box = particle.hyper_box(self.n_steps,self.image_dict)
+		new_box.state.set_pos(coor[0],coor[1])
+		self.entities.append(new_box)
 	
 	def step(self,cur_tick,pressed,event_list):
 		# Propagate all entities
 		for entity in self.entities:
 			entity.prop(self.n_steps)
+			
+		# Collision check
+		for i in range(0,len(self.entities)-1):
+			for j in range(i+1,len(self.entities)):
+				self.entities[i].state.col(self.entities[j].state)
 			
 		# Process user input
 		wasd = [False,False,False,False] # up,down,left,right
