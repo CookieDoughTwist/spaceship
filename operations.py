@@ -52,11 +52,14 @@ def vert_intercept(line,x):
 
 def in_bounds(bounds,point):
     intercepts = 0
-    for i in range(len(bounds)-1):
-        line = (bounds[i],bounds[i+1])
+    for i in range(len(bounds)):
+        if i == len(bounds)-1:
+            line = (bounds[i],bounds[0])
+        else:
+            line = (bounds[i],bounds[i+1])
         # check if point is outside x bounds
-        if not((point[0] > line[0][0] and point[0] < line[0][1]) or \
-            (point[0] < line[0][0] and point[0] > line[0][1])):
+        if not((point[0] > line[0][0] and point[0] < line[1][0]) or \
+            (point[0] < line[0][0] and point[0] > line[1][0])):
             continue
         y = vert_intercept(line,point[0])
         if y is not None and point[1] > y: # check if point_y is above the vertical intersect (y)
